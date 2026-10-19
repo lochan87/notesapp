@@ -24,11 +24,7 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://192.168.0.102:3000',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: true,
   credentials: true
 }));
 
@@ -36,20 +32,41 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noteapp';
+// MongoDB connection with caching for serverless environments
+let cachedConnection = null;
 
-mongoose.connect(MONGODB_URI)
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+const connectDB = async () => {
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
+  const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noteapp';
+  cachedConnection = await mongoose.connect(MONGODB_URI);
+  return cachedConnection;
+};
+
+// Database connection middleware
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    res.status(500).json({ message: 'Database connection failed' });
+  }
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/folders', folderRoutes);
 app.use('/api/notes', noteRoutes);
 
+// Fallback mounts if /api prefix is stripped by serverless router
+app.use('/auth', authRoutes);
+app.use('/folders', folderRoutes);
+app.use('/notes', noteRoutes);
+
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
@@ -67,8 +84,21 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Local access: http://localhost:${PORT}`);
-  console.log(`Network access: http://192.168.0.102:${PORT}`);
-});
+// Only start listening when run directly (local development), not inside Vercel serverless
+if (require.main === module && !process.env.VERCEL) {
+  connectDB()
+    .then(() => {
+      console.log('Connected to MongoDB');
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Local access: http://localhost:${PORT}`);
+        console.log(`Network access: http://192.168.0.102:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('MongoDB initial connection error:', err);
+    });
+}
+
+module.exports = app;
+
