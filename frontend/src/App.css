@@ -754,6 +754,18 @@
 }
 
 
+/* Note Card Theme-Adaptive Loading Overlay */
+.note-card-loading-overlay {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(2px);
+  z-index: 5;
+  transition: opacity 0.2s ease;
+}
+
+.dark-theme .note-card-loading-overlay {
+  background-color: rgba(30, 30, 30, 0.85);
+}
+
 .dark-theme .card {
   background-color: var(--bg-secondary) !important;
   border-color: var(--border-color) !important;

@@ -316,7 +316,20 @@ const FolderView: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button className="btn btn-outline-secondary" type="submit">
+                {searchQuery && (
+                  <button 
+                    className="btn btn-outline-secondary" 
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setPagination(prev => ({ ...prev, current: 1 }));
+                    }}
+                    title="Clear search"
+                  >
+                    <i className="bi bi-x"></i>
+                  </button>
+                )}
+                <button className="btn btn-outline-secondary" type="submit" title="Search">
                   <i className="bi bi-search"></i>
                 </button>
               </div>
@@ -457,80 +470,93 @@ const FolderView: React.FC = () => {
               );
             })()}
 
-            {viewMode === 'grid' ? (
-              notes
-                .filter(n => !activeTag || (n.tags || []).includes(activeTag))
-                .map(note => (
-                <div key={note._id} className="col-lg-4 col-md-6 mb-4">
-                  <NoteCard
-                    note={note}
-                    onDeleted={handleNoteDeleted}
-                    onUpdated={handleNoteUpdated}
-                    folderColor={folder?.color}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="col-12">
-                <div className="card">
-                  <div className="card-body p-0">
-                    <div className="table-responsive">
-                      <table className="table table-hover mb-0">
-                        <thead className="table-light">
-                          <tr>
-                            <th>Title</th>
-                            <th>Tags</th>
-                            <th>Modified</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {notes.map(note => (
-                            <tr key={note._id}>
-                              <td>
-                                <Link
-                                  to={`/note/${note._id}`}
-                                  className="text-decoration-none text-primary"
-                                >
-                                  <div className="d-flex align-items-center">
-                                    {note.isPinned && (
-                                      <i className="bi bi-pin-fill text-warning me-2"></i>
-                                    )}
-                                    <span className="fw-semibold">{note.title}</span>
-                                  </div>
-                                </Link>
-                              </td>
-                              <td>
-                                {note.tags.map(tag => (
-                                  <span key={tag} className="badge bg-secondary me-1">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </td>
-                              <td className="text-muted">
-                                {new Date(note.lastModified).toLocaleDateString()}
-                              </td>
-                              <td className="text-muted">
-                                {new Date(note.createdAt).toLocaleDateString()}
-                              </td>
-                              <td>
-                                <Link
-                                  to={`/note/${note._id}`}
-                                  className="btn btn-sm btn-outline-primary"
-                                >
-                                  <i className="bi bi-eye"></i>
-                                </Link>
-                              </td>
+            {(() => {
+              const filteredNotes = notes.filter(n => !activeTag || (n.tags || []).includes(activeTag));
+              
+              if (filteredNotes.length === 0 && activeTag) {
+                return (
+                  <div className="col-12 py-4 text-center">
+                    <p className="text-muted mb-2">No notes tagged with <span className="badge bg-secondary">{activeTag}</span></p>
+                    <button className="btn btn-sm btn-outline-primary" onClick={() => setActiveTag(null)}>
+                      Clear Tag Filter
+                    </button>
+                  </div>
+                );
+              }
+
+              return viewMode === 'grid' ? (
+                filteredNotes.map(note => (
+                  <div key={note._id} className="col-lg-4 col-md-6 mb-4">
+                    <NoteCard
+                      note={note}
+                      onDeleted={handleNoteDeleted}
+                      onUpdated={handleNoteUpdated}
+                      folderColor={folder?.color}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-12">
+                  <div className="card shadow-sm border-0">
+                    <div className="card-body p-0">
+                      <div className="table-responsive">
+                        <table className="table table-hover align-middle mb-0">
+                          <thead className="app-table-header">
+                            <tr>
+                              <th>Title</th>
+                              <th>Tags</th>
+                              <th>Modified</th>
+                              <th>Created</th>
+                              <th>Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {filteredNotes.map(note => (
+                              <tr key={note._id}>
+                                <td>
+                                  <Link
+                                    to={`/note/${note._id}`}
+                                    className="text-decoration-none text-primary"
+                                  >
+                                    <div className="d-flex align-items-center">
+                                      {note.isPinned && (
+                                        <i className="bi bi-pin-fill text-warning me-2"></i>
+                                      )}
+                                      <span className="fw-semibold">{note.title}</span>
+                                    </div>
+                                  </Link>
+                                </td>
+                                <td>
+                                  {note.tags.map(tag => (
+                                    <span key={tag} className="badge bg-secondary me-1">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </td>
+                                <td className="text-muted small">
+                                  {new Date(note.lastModified).toLocaleDateString()}
+                                </td>
+                                <td className="text-muted small">
+                                  {new Date(note.createdAt).toLocaleDateString()}
+                                </td>
+                                <td>
+                                  <Link
+                                    to={`/note/${note._id}`}
+                                    className="btn btn-sm btn-outline-primary"
+                                  >
+                                    <i className="bi bi-eye"></i>
+                                  </Link>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Pagination */}

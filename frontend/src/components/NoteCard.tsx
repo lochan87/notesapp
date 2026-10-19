@@ -69,7 +69,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDeleted, onUpdated, folderC
               )}
             </div>
 
-            <div className="dropdown">
+            <div className="dropdown" style={{ position: 'relative', zIndex: 2 }}>
               <button
                 className="btn btn-sm btn-link text-muted p-1"
                 type="button"
@@ -182,7 +182,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDeleted, onUpdated, folderC
 
         {/* Loading overlay */}
         {(isDeleting || isTogglingPin) && (
-          <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 rounded">
+          <div className="note-card-loading-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded">
             <div className={`spinner-border ${isDeleting ? 'text-danger' : 'text-primary'}`} role="status">
               <span className="visually-hidden">
                 {isDeleting ? 'Deleting…' : 'Updating…'}

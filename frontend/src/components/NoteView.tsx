@@ -163,7 +163,7 @@ const NoteView: React.FC = () => {
       setNote(updatedNote);
       setEditData(prev => ({ ...prev, isPinned: updatedNote.isPinned }));
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update note. Please try again.');
+      addToast(err.response?.data?.message || 'Failed to update note. Please try again.', 'error');
     }
   };
 
