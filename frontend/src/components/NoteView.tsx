@@ -4,6 +4,60 @@ import { noteApi, Note } from '../services/api';
 import ConfirmModal from './ConfirmModal';
 import Toast, { useToast } from './Toast';
 
+interface ImageItem {
+  id: string;
+  file: File;
+  previewUrl: string;
+}
+
+// Client-side image optimization to prevent >4.5MB Vercel serverless body rejection
+const compressImage = (file: File, maxDim = 1600, quality = 0.85): Promise<File> => {
+  return new Promise((resolve) => {
+    if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
+      return resolve(file);
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(file);
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return resolve(file);
+            const optimizedFile = new File(
+              [blob],
+              file.name.replace(/\.[^.]+$/, '.jpg'),
+              { type: 'image/jpeg', lastModified: Date.now() }
+            );
+            resolve(optimizedFile);
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+};
+
 const NoteView: React.FC = () => {
   const { noteId } = useParams<{ noteId: string }>();
   const navigate = useNavigate();
@@ -22,7 +76,17 @@ const NoteView: React.FC = () => {
     createdAt: '',
     lastModified: ''
   });
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImageItem[]>([]);
+  const selectedImagesRef = useRef<ImageItem[]>([]);
+  selectedImagesRef.current = selectedImages;
+
+  // Cleanup object URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      selectedImagesRef.current.forEach(img => URL.revokeObjectURL(img.previewUrl));
+    };
+  }, []);
+
   const [imagesToRemove, setImagesToRemove] = useState<string[]>([]);
   const [datesModified, setDatesModified] = useState({
     createdAt: false,
@@ -106,7 +170,7 @@ const NoteView: React.FC = () => {
         content: editData.content.trim(),
         tags,
         isPinned: editData.isPinned,
-        images: selectedImages,
+        images: selectedImages.map(img => img.file),
         removeImages: imagesToRemove
       };
 
@@ -124,6 +188,8 @@ const NoteView: React.FC = () => {
       setNote(updatedNote);
       setIsEditing(false);
       setDatesModified({ createdAt: false, lastModified: false });
+      // Revoke preview URLs before clearing
+      selectedImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
       setSelectedImages([]);
       setImagesToRemove([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -205,6 +271,7 @@ const NoteView: React.FC = () => {
       createdAt: false,
       lastModified: false
     });
+    selectedImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
     setSelectedImages([]);
     setImagesToRemove([]);
     setIsEditing(false);
@@ -214,7 +281,7 @@ const NoteView: React.FC = () => {
     }
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
     // Validate file types and sizes
@@ -223,8 +290,8 @@ const NoteView: React.FC = () => {
         addToast(`${file.name} is not an image file`, 'error');
         return false;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        addToast(`${file.name} is too large. Max size is 5 MB`, 'error');
+      if (file.size > 15 * 1024 * 1024) {
+        addToast(`${file.name} is too large. Max size is 15 MB`, 'error');
         return false;
       }
       return true;
@@ -236,11 +303,29 @@ const NoteView: React.FC = () => {
       return;
     }
 
-    setSelectedImages(prev => [...prev, ...validFiles]);
+    try {
+      const optimizedFiles = await Promise.all(validFiles.map(f => compressImage(f)));
+      const newItems: ImageItem[] = optimizedFiles.map(file => ({
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        file,
+        previewUrl: URL.createObjectURL(file)
+      }));
+      setSelectedImages(prev => [...prev, ...newItems]);
+    } catch {
+      addToast('Failed to process image', 'error');
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const removeNewImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setSelectedImages(prev => {
+      const item = prev[index];
+      if (item) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const removeExistingImage = (filename: string) => {
@@ -250,8 +335,6 @@ const NoteView: React.FC = () => {
   const restoreExistingImage = (filename: string) => {
     setImagesToRemove(prev => prev.filter(f => f !== filename));
   };
-
-  const getImagePreview = (file: File): string => URL.createObjectURL(file);
 
   // Drag-to-reorder existing images
   const handleImageDragStart = (index: number) => setDragImageIndex(index);
@@ -427,6 +510,23 @@ const NoteView: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showImageModal, selectedImageIndex, zoomLevel, panOffset]);
+
+  const handleSaveRef = useRef(handleSave);
+  handleSaveRef.current = handleSave;
+
+  // Ctrl+S / Cmd+S shortcut to save note while editing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        if (isEditing && !isSaving && editData.title.trim() && editData.content.trim()) {
+          e.preventDefault();
+          handleSaveRef.current();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditing, isSaving, editData.title, editData.content]);
 
   if (loading) {
     return (
@@ -850,11 +950,11 @@ const NoteView: React.FC = () => {
                   ))}
                   
                   {/* New images in edit mode */}
-                  {isEditing && selectedImages.map((file, index) => (
-                    <div key={`new-${index}`} className="col-6">
+                  {isEditing && selectedImages.map((imgItem, index) => (
+                    <div key={imgItem.id} className="col-6">
                       <div className="position-relative">
                         <img
-                          src={getImagePreview(file)}
+                          src={imgItem.previewUrl}
                           alt={`New ${index + 1}`}
                           className="img-fluid rounded"
                           style={{ aspectRatio: '1/1', objectFit: 'cover' }}
