@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { folderApi, Folder } from '../services/api';
 
 interface CreateFolderModalProps {
@@ -16,6 +16,16 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ show, onHide, onF
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Close modal when pressing Escape
+  useEffect(() => {
+    if (!show) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onHide();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [show, onHide]);
 
   const predefinedColors = [
     '#007bff', // Primary blue
@@ -218,7 +228,7 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ show, onHide, onF
                 {/* Preview */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Preview</label>
-                  <div className="p-3 bg-light rounded">
+                  <div className="p-3 folder-preview-box rounded">
                     <div className="d-flex align-items-center">
                       <div
                         className="rounded me-3"

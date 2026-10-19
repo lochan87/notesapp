@@ -25,7 +25,16 @@ const Dashboard: React.FC = () => {
   const [folderToEdit, setFolderToEdit] = useState<Folder | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('noteapp-folder-view-mode') as 'grid' | 'list') || 'grid';
+  });
+
+  const handleSetViewMode = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('noteapp-folder-view-mode', mode);
+    } catch {}
+  };
 
   useEffect(() => {
     loadFolders();
@@ -138,7 +147,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="button"
                   className={`btn btn-sm btn-outline-secondary ${viewMode === 'grid' ? 'active' : ''}`}
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => handleSetViewMode('grid')}
                   title="Grid view"
                 >
                   <i className="bi bi-grid"></i>
@@ -146,7 +155,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="button"
                   className={`btn btn-sm btn-outline-secondary ${viewMode === 'list' ? 'active' : ''}`}
-                  onClick={() => setViewMode('list')}
+                  onClick={() => handleSetViewMode('list')}
                   title="List view"
                 >
                   <i className="bi bi-list"></i>

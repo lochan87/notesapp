@@ -1258,6 +1258,16 @@
   transform: translateY(-2px);
 }
 
+.folder-preview-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+[data-theme='dark'] .folder-preview-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .login-brand-icon {
   animation: loginIconFloat 3s ease-in-out infinite;
 }

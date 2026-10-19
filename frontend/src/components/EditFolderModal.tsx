@@ -47,6 +47,22 @@ const EditFolderModal: React.FC<EditFolderModalProps> = ({ show, onHide, onFolde
     }
   }, [folder, show]);
 
+  // Close modal when pressing Escape
+  useEffect(() => {
+    if (!show) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showDeleteConfirm) {
+          setShowDeleteConfirm(false);
+        } else {
+          onHide();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [show, showDeleteConfirm, onHide]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -290,7 +306,7 @@ const EditFolderModal: React.FC<EditFolderModalProps> = ({ show, onHide, onFolde
                 {/* Preview */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Preview</label>
-                  <div className="p-3 bg-light rounded">
+                  <div className="p-3 folder-preview-box rounded">
                     <div className="d-flex align-items-center">
                       <div
                         className="rounded me-3"

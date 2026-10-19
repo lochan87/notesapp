@@ -29,10 +29,23 @@ const FolderView: React.FC = () => {
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('noteapp-notes-view-mode') as 'grid' | 'list') || 'grid';
+  });
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState(() => {
+    return localStorage.getItem('noteapp-sort-by') || 'createdAt';
+  });
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => {
+    return (localStorage.getItem('noteapp-sort-order') as 'asc' | 'desc') || 'desc';
+  });
+
+  const handleSetViewMode = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('noteapp-notes-view-mode', mode);
+    } catch {}
+  };
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -207,12 +220,18 @@ const FolderView: React.FC = () => {
   };
 
   const handleSortChange = (newSortBy: string) => {
+    let nextOrder: 'asc' | 'desc' = 'desc';
     if (sortBy === newSortBy) {
-      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+      nextOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      setSortOrder(nextOrder);
     } else {
       setSortBy(newSortBy);
       setSortOrder('desc');
     }
+    try {
+      localStorage.setItem('noteapp-sort-by', newSortBy);
+      localStorage.setItem('noteapp-sort-order', nextOrder);
+    } catch {}
     setPagination(prev => ({ ...prev, current: 1 }));
   };
 
@@ -379,14 +398,16 @@ const FolderView: React.FC = () => {
               <button
                 type="button"
                 className={`btn btn-outline-secondary ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
+                onClick={() => handleSetViewMode('grid')}
+                title="Grid view"
               >
                 <i className="bi bi-grid"></i>
               </button>
               <button
                 type="button"
                 className={`btn btn-outline-secondary ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
+                onClick={() => handleSetViewMode('list')}
+                title="List view"
               >
                 <i className="bi bi-list"></i>
               </button>
