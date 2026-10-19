@@ -231,6 +231,22 @@
   background-color: rgba(0, 123, 255, 0.05);
 }
 
+/* Theme-Adaptive Table Header */
+.app-table-header th {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 2px solid var(--border-color) !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  padding: 0.85rem 1rem !important;
+}
+
+.table tbody td {
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.85rem 1rem;
+}
+
 /* Dropdown Customizations */
 .dropdown-menu {
   border-radius: 8px;
