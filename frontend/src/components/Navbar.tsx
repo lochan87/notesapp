@@ -28,12 +28,9 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-    <nav
-      className={`navbar navbar-expand-lg ${isDark ? 'navbar-dark bg-dark' : 'navbar-dark bg-primary'} shadow-sm`}
-      style={{ minHeight: '60px' }}
-    >
-      <div className="container" style={{ minHeight: '60px', alignItems: 'center' }}>
-        <Link className="navbar-brand fw-bold" to="/">
+    <nav className="app-navbar navbar navbar-expand-lg">
+      <div className="container">
+        <Link className="navbar-brand" to="/">
           <i className="bi bi-journal-text me-2"></i>
           Notes App
         </Link>
@@ -63,25 +60,17 @@ const Navbar: React.FC = () => {
             </li>
           </ul>
 
-          <ul className="navbar-nav">
+          <ul className="navbar-nav align-items-lg-center">
             {/* Theme Toggle */}
-            <li className="nav-item me-3">
+            <li className="nav-item me-lg-2">
               <button
-                className="theme-toggle nav-link border-0 bg-transparent"
+                className="theme-toggle-btn"
                 onClick={toggleTheme}
                 title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-                style={{
-                  color: 'inherit',
-                  background: 'transparent',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '50px',
-                  padding: '0.5rem 1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
+                aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+                type="button"
               >
-                <i className={`bi bi-${isDark ? 'sun' : 'moon'}-fill`}></i>
+                <i className={`bi bi-${isDark ? 'sun' : 'moon'}-fill`} aria-hidden="true"></i>
                 <span>{isDark ? 'Light' : 'Dark'}</span>
               </button>
             </li>
@@ -89,14 +78,13 @@ const Navbar: React.FC = () => {
             {/* User dropdown */}
             <li className="nav-item dropdown">
               <button
-                className="nav-link dropdown-toggle d-flex align-items-center btn btn-link"
+                className="user-profile-btn dropdown-toggle"
                 type="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 id="navbarDropdown"
-                style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                <i className="bi bi-person-circle me-2"></i>
+                <i className="bi bi-person-circle" aria-hidden="true"></i>
                 <span>Lochan</span>
               </button>
               <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
