@@ -2,7 +2,6 @@
   "name": "noteapp",
   "version": "1.0.0",
   "description": "A modern, full-featured notes application with folders, image support, and search functionality",
-  "main": "index.js",
   "scripts": {
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
@@ -21,7 +20,7 @@
     "bootstrap",
     "full-stack"
   ],
-  "author": "Notes App Team",
+  "author": "Lochan",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
