@@ -1261,11 +1261,43 @@
 .folder-preview-box {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
+  color: #212529;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-[data-theme='dark'] .folder-preview-box {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.dark-theme .folder-preview-box,
+[data-bs-theme='dark'] .folder-preview-box {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f8f9fa !important;
+}
+
+.dark-theme .folder-preview-box .text-muted,
+[data-bs-theme='dark'] .folder-preview-box .text-muted {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Dark mode native form controls */
+.dark-theme input[type='datetime-local'],
+.dark-theme input[type='date'],
+.dark-theme input[type='time'],
+[data-bs-theme='dark'] input[type='datetime-local'],
+[data-bs-theme='dark'] input[type='date'],
+[data-bs-theme='dark'] input[type='time'] {
+  color-scheme: dark;
+}
+
+.dark-theme .form-control::file-selector-button,
+[data-bs-theme='dark'] .form-control::file-selector-button {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .form-control-color,
+[data-bs-theme='dark'] .form-control-color {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
 }
 
 .login-brand-icon {

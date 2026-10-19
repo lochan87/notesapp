@@ -231,19 +231,19 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ show, onHide, onF
                   <div className="p-3 folder-preview-box rounded">
                     <div className="d-flex align-items-center">
                       <div
-                        className="rounded me-3"
+                        className="rounded me-3 flex-shrink-0"
                         style={{
                           width: '24px',
                           height: '24px',
                           backgroundColor: formData.color,
                         }}
                       ></div>
-                      <div>
-                        <div className="fw-semibold">
+                      <div className="min-w-0 flex-grow-1 text-truncate">
+                        <div className="fw-semibold text-truncate">
                           {formData.name || 'Folder Name'}
                         </div>
                         {formData.description && (
-                          <small className="text-muted">
+                          <small className="text-muted d-block text-truncate">
                             {formData.description}
                           </small>
                         )}

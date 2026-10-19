@@ -603,7 +603,7 @@ const NoteView: React.FC = () => {
               </div>
             </div>
             
-            <div className="btn-group btn-group-sm d-flex justify-content-start gap-2">
+            <div className="d-flex flex-wrap align-items-center gap-2">
               {!isEditing ? (
                 <>
                   <button
@@ -872,23 +872,30 @@ const NoteView: React.FC = () => {
           {/* Images Section */}
           <div className="card shadow-sm border-0 mb-4">
             <div className="card-header bg-transparent">
-              <h6 className="card-title mb-0">
-                <i className="bi bi-images me-2"></i>
-                Images
+              <div className="d-flex justify-content-between align-items-center">
+                <h6 className="card-title mb-0">
+                  <i className="bi bi-images me-2"></i>
+                  Images
+                </h6>
                 {isEditing && (
-                  <span className="ms-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="form-control form-control-sm"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      disabled={isSaving}
-                    />
+                  <span className="badge bg-secondary">
+                    {(note.images?.length || 0) - imagesToRemove.length + selectedImages.length}/5
                   </span>
                 )}
-              </h6>
+              </div>
+              {isEditing && (
+                <div className="mt-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="form-control form-control-sm"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    disabled={isSaving}
+                  />
+                </div>
+              )}
             </div>
             <div className="card-body">
               {note.images && note.images.length > 0 ? (

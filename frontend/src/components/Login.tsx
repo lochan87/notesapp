@@ -72,7 +72,7 @@ const Login: React.FC = () => {
         <div className="row justify-content-center">
           <div className="col-md-6 col-lg-4">
             <div className={`card border-0 ${isDark ? 'login-glass-card' : 'login-light-card'}`}>
-              <div className="card-body p-5">
+              <div className="card-body p-4 p-sm-5">
 
                 {/* Brand */}
                 <div className="text-center mb-4">
