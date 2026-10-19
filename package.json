@@ -1,0 +1,33 @@
+{
+  "name": "noteapp",
+  "version": "1.0.0",
+  "description": "A modern, full-featured notes application with folders, image support, and search functionality",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "notes",
+    "react",
+    "nodejs",
+    "mongodb",
+    "typescript",
+    "bootstrap",
+    "full-stack"
+  ],
+  "author": "Notes App Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
