@@ -98,7 +98,7 @@ const Login: React.FC = () => {
                       fontSize: '0.88rem'
                     }}
                   >
-                    Your secret place to keep your things safe.
+                    Lochan's secret place to keep his things safe.
                   </p>
                 </div>
 
