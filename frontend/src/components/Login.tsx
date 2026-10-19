@@ -5,10 +5,12 @@ import { Navigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsLockOn, setCapsLockOn] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
 
   // Warm up the Render backend the instant the login page loads.
   useEffect(() => {
@@ -21,6 +23,10 @@ const Login: React.FC = () => {
   if (isAuthenticated) {
     return <Navigate to="/" />;
   }
+
+  const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockOn(e.getModifierState('CapsLock'));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +51,23 @@ const Login: React.FC = () => {
 
   return (
     <div className={isDark ? 'login-hero-bg' : 'login-hero-bg-light'}>
+      {/* Floating Theme Toggle */}
+      <div className="login-theme-toggle">
+        <button
+          type="button"
+          className={`btn btn-sm ${isDark ? 'btn-outline-light' : 'btn-outline-secondary'} rounded-pill px-3 shadow-sm`}
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          style={{
+            background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.85)',
+            borderWidth: '1px'
+          }}
+        >
+          <i className={`bi bi-${isDark ? 'sun-fill text-warning' : 'moon-stars-fill text-primary'} me-1`} />
+          <span>{isDark ? 'Light' : 'Dark'}</span>
+        </button>
+      </div>
+
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div className="row justify-content-center">
           <div className="col-md-6 col-lg-4">
@@ -94,16 +117,35 @@ const Login: React.FC = () => {
                         <i className="bi bi-lock" />
                       </span>
                       <input
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        autoComplete="current-password"
                         className={`form-control ${error ? 'is-invalid' : ''}`}
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={checkCapsLock}
+                        onKeyUp={checkCapsLock}
                         placeholder="Enter your password"
                         disabled={loading}
                         autoFocus
                       />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                        tabIndex={-1}
+                      >
+                        <i className={`bi bi-${showPassword ? 'eye-slash' : 'eye'}`} />
+                      </button>
                     </div>
+                    {capsLockOn && (
+                      <div className="text-warning small mt-1 d-flex align-items-center">
+                        <i className="bi bi-capslock-fill me-1" />
+                        Caps Lock is ON
+                      </div>
+                    )}
                     {error && (
                       <div className="invalid-feedback d-block">
                         <i className="bi bi-exclamation-circle me-1" />

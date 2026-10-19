@@ -1233,6 +1233,31 @@
   color: #ff9898 !important;
 }
 
+.login-glass-card .input-group .btn-outline-secondary {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.login-glass-card .input-group .btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.login-theme-toggle {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-theme-toggle:hover {
+  transform: translateY(-2px);
+}
+
 .login-brand-icon {
   animation: loginIconFloat 3s ease-in-out infinite;
 }
